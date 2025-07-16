@@ -8,6 +8,9 @@ const port = process.env.PORT || 4000;  // use env var or default to 4000
 const da = require("./data-access.js");  // import data access module
 const bodyParser = require('body-parser');
 
+const checkApiKey = require("./security").checkApiKey;
+const getNewApiKey = require("./security").getNewApiKey;
+
 app.use(bodyParser.json());  // for parsing application/json
 
 // Set the static directory to serve files from
@@ -17,7 +20,18 @@ app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
-app.get("/customers", async (req, res) => {
+app.get("/apikey", async (req, res) => {
+    let email = req.query.email;
+    if(email){
+        const newApiKey = getNewApiKey(email);
+        res.send(newApiKey);
+    }else{
+        res.status(400);
+        res.send("an email query param is required");
+    }   
+});
+
+app.get("/customers", checkApiKey, async (req, res) => {
      const [cust, err] = await da.getCustomers();
      if(cust){
          res.send(cust);
@@ -27,7 +41,7 @@ app.get("/customers", async (req, res) => {
      }   
 });
 
-app.get("/reset", async (req, res) => {
+app.get("/reset", checkApiKey, async (req, res) => {
     const [result, err] = await da.resetCustomers();
     if(result){
         res.send(result);
@@ -37,7 +51,7 @@ app.get("/reset", async (req, res) => {
     }   
 });
 
-app.get("/customers/:id", async (req, res) => {
+app.get("/customers/:id", checkApiKey, async (req, res) => {
      const id = req.params.id;
      // return array [customer, errMessage]
      const [cust, err] = await da.getCustomerById(id);
@@ -49,7 +63,7 @@ app.get("/customers/:id", async (req, res) => {
      }   
 });
 
-app.post('/customers', async (req, res) => {
+app.post('/customers', checkApiKey, async (req, res) => {
     const newCustomer = req.body;
     if (newCustomer === null || req.body == {}) {
         res.status(400);
@@ -69,7 +83,7 @@ app.post('/customers', async (req, res) => {
     }
 });
 
-app.put('/customers/:id', async (req, res) => {
+app.put('/customers/:id', checkApiKey, async (req, res) => {
     const id = req.params.id;
     const updatedCustomer = req.body;
     if (updatedCustomer === null) {
@@ -88,7 +102,7 @@ app.put('/customers/:id', async (req, res) => {
     }
 });
 
-app.delete("/customers/:id", async (req, res) => {
+app.delete("/customers/:id", checkApiKey, async (req, res) => {
     const id = req.params.id;
     // return array [message, errMessage]
     const [message, errMessage] = await da.deleteCustomerById(id);
