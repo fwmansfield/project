@@ -38,7 +38,7 @@ function checkApiKey(req, res, next) {
   
     // Check if API key is present
     if (!apiKeyHeader) {
-      return res.status(401).json({ message: 'Unauthorized: Missing API key' });
+      return res.status(401).json({ message: 'API Key is missing' });
     }
   
     // Compare the received key with the stored key (from environment variable or configuration file)
@@ -49,7 +49,7 @@ function checkApiKey(req, res, next) {
       }
     }
     if (!keyValid ) {
-      return res.status(403).json({ message: 'Forbidden: Invalid API key' });
+      return res.status(403).json({ message: 'API Key is invalid' });
     }
   
     // If valid key, continue processing the request
