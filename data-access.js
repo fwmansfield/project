@@ -96,5 +96,19 @@ async function deleteCustomerById(id) {
     }
 }
 
+async function findCustomers(filterObject) {
+    try {
+        const customers = await collection.find(filterObject).toArray();
+        // return array [customer, errMessage]
+        if(!customers|| customers.length == 0 ){
+          return [ null, "no customer documents found"];
+        }
+        return [customers, null];
+    } catch (err) {
+        console.log(err.message);
+        return [null, err.message];
+    }
+}
+
 dbStartup();
-module.exports = { getCustomers, resetCustomers, addCustomer, getCustomerById, updateCustomer, deleteCustomerById };
+module.exports = { getCustomers, resetCustomers, addCustomer, getCustomerById, updateCustomer, deleteCustomerById, findCustomers };
